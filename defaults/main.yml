@@ -1,0 +1,14 @@
+---
+  # title: ansible-role-samba4-primary-ad-dc
+  #
+  # Author: Luc Rutten
+  # Version: 1.0
+  # File: defaults/main.yml
+  #
+  # Description: Creating a primairy Active Directory Domain Controller.
+
+  smb_workgroup: TEST
+  smb_realm: TEST.NET
+  smb_dns_servers: {{ ansible_default_ipv4.address }}
+  smb_username: administrator
+  smb_password: Welkom123

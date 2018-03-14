@@ -1,0 +1,10 @@
+---
+  # title: ansible-role-samba4-primary-ad-dc
+  #
+  # Author: Luc Rutten
+  # Version: 1.0
+  # File: meta/main.yml
+  #
+  # Description: Creating a primairy Active Directory Domain Controller.
+
+  #- requierd ansible-role-ntp-server
