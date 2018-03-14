@@ -68,7 +68,7 @@
 
   - name: "rm /etc/samba/smb.conf"
     file:
-      src: /etc/samba/smb.conf
+      path: /etc/samba/smb.conf
       state: absent
     when:
       - smb_dc_result.failed == true
