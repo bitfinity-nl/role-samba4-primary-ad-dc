@@ -7,15 +7,25 @@
   #
   # Description: Creating a primairy Active Directory Domain Controller.
 
+  - name: "Check OS if is allready DC"
+    shell: "samba-tool domain info {{ ansible_default_ipv4.address }}"
+      register: smb_dc_result
+      ignore_errors: yes
 
   - name: "Preseed Kerberos version 5: krb5-config/default_realm"
     raw: "echo krb5-config krb5-config/default_realm string {{ smb_realm }} | sudo debconf-set-selections"
+    when:
+      - smb_dc_result.failed == true
 
   - name: "Preseed Kerberos version 5: krb5-config/add_servers_realm"
     raw: "echo krb5-config krb5-config/add_servers_realm string {{ smb_realm }} | sudo debconf-set-selections"
+    when:
+      - smb_dc_result.failed == true
 
   - name: "Preseed PAM Configuration"
     raw: "echo libpam-runtime  libpam-runtime/profiles multiselect     unix, winbind, systemd, mkhomedir | sudo debconf-set-selections"
+    when:
+      - smb_dc_result.failed == true
 
   - name: "Install dependencies"
     apt:
@@ -31,6 +41,8 @@
       - winbind
       - libpam-winbind
       - libnss-winbind
+    when:
+      - smb_dc_result.failed == true
 
    - name: "Disable Services"
      systemd:
@@ -42,6 +54,8 @@
        - smbd.service
        - nmbd.service
        - winbind.service
+    when:
+      - smb_dc_result.failed == true
 
    - name: "back-Up the initial /etc/samba/smb.conf to /etc/samba/smb.conf.initial"
      copy:
@@ -49,14 +63,20 @@
        dest: /etc/samba/smb.conf.initial
        remote_src: yes
        force: no
+    when:
+      - smb_dc_result.failed == true
 
    - name: "rm /etc/samba/smb.conf"
      file:
        src: /etc/samba/smb.conf
        state: absent
+    when:
+      - smb_dc_result.failed == true
 
    - name: "Start domain provisioning"
      raw: "samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=SAMBA_INTERNAL --realm={{ smb_realm }} --domain={{ smb_workgroup }} --adminpass={{ smb_password }}"
+    when:
+      - smb_dc_result.failed == true
 
    - name: "back-Up the initial /etc/krb5.conf to /etc/krb5.conf.initial"
      copy:
@@ -64,6 +84,8 @@
        dest: /etc/krb5.conf.initial
        remote_src: yes
        force: no
+    when:
+      - smb_dc_result.failed == true
 
    - name: "Symlink to /var/lib/samba/private/krb5.conf to /etc/krb5.conf"
      file:
@@ -71,6 +93,8 @@
         dest: /etc/krb5.conf
         state: link
         force: yes
+    when:
+      - smb_dc_result.failed == true
 
    - name: "Enable Services"
      systemd:
@@ -82,6 +106,8 @@
        - smbd.service
        - nmbd.service
        - winbind.service
+    when:
+      - smb_dc_result.failed == true
 
    - name: "Edit Fstab"
      replace:
@@ -89,3 +115,5 @@
        regexp: 'errors=remount-ro 0'
        replace: 'user_xattr,acl,barrier=1,errors=remount-ro,relatime 0'
        backup: yes
+    when:
+      - smb_dc_result.failed == true
