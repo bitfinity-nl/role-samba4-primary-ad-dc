@@ -7,8 +7,8 @@
   #
   # Description: Creating a primairy Active Directory Domain Controller.
 
-  smb_workgroup: TEST
-  smb_realm: TEST.NET
-  smb_dns_servers: {{ ansible_default_ipv4.address }}
-  smb_username: administrator
-  smb_password: Welkom123
+  smb_workgroup   : TEST
+  smb_realm       : TEST.NET
+  smb_dns_servers : "{{ ansible_default_ipv4.address }}"
+  smb_username    : administrator
+  smb_password    : Welkom123
