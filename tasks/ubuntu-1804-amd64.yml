@@ -54,6 +54,7 @@
       - smbd.service
       - nmbd.service
       - winbind.service
+      - systemd-resolved
     when:
       - smb_dc_result.failed == true
 
