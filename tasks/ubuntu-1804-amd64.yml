@@ -117,3 +117,9 @@
       backup: yes
     when:
       - smb_dc_result.failed == true
+      
+
+  - name: "Allow traffic for Application Samba4 AD-DC"
+    ufw:
+      rule: allow
+      name: Samba
