@@ -1,0 +1,13 @@
+---
+# title: role-samba4-primary-ad-dc
+#
+# Author: bitfinity-nl
+# Version: 1.0
+# File: handlers/main.yml
+#
+# Description: Creating a primairy Active Directory Domain Controller.
+
+- name: "restart_samba"
+  systemd:
+    state: restarted
+    name: samba-ad-dc.service

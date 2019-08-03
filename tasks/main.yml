@@ -1,18 +1,20 @@
 ---
-  # Role: Install Samba4 as an Active Directory Domain Controller
-  #
-  # Supported OS:
-  #   - Ubuntu 16.04LTS
-  #   - Ubuntu 18.04LTS
+# title: role-samba4-primary-ad-dc
+#
+# Author: bitfinity-nl
+# Version: 1.0
+# File: tasks/main.yml
+#
+# Description: Creating a primairy Active Directory Domain Controller.
 
-  - name: "For OS: Ubuntu 16.04LTS, Arch: amd64"
-    import_tasks: ubuntu-1604-amd64.yml
-    when:
-      - ansible_distribution_version == "16.04"
-      - ansible_architecture == "x86_64"
+- name: "For OS: Ubuntu 16.04LTS, Arch: amd64"
+  import_tasks: ubuntu-1604-amd64.yml
+  when:
+    - ansible_distribution_version == "16.04"
+    - ansible_architecture == "x86_64"
 
-  - name: "For OS: Ubuntu 18.04LTS, Arch: amd64"
-    import_tasks: ubuntu-1804-amd64.yml
-    when:
-      - ansible_distribution_version == "18.04"
-      - ansible_architecture == "x86_64"
+- name: "For OS: Ubuntu 18.04LTS, Arch: amd64"
+  import_tasks: ubuntu-1804-amd64.yml
+  when:
+    - ansible_distribution_version == "18.04"
+    - ansible_architecture == "x86_64"

@@ -1,0 +1,69 @@
+---
+# title: role-samba4-primary-ad-dc
+#
+# Author: bitfinity-nl
+# Version: 1.0
+# File: tasks/ubt-1804-amd64-login.yml
+#
+# Description: Creating a primairy Active Directory Domain Controller.
+
+- name: "Edit Fstab"
+  replace:
+    path: /etc/fstab
+    regexp: 'errors=remount-ro 0'
+    replace: 'user_xattr,acl,barrier=1,errors=remount-ro,relatime 0'
+    backup: yes
+
+- name:  "Download template smb.conf.j2 to /etc/samba/smb.conf"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: yes
+  with_items:
+    - { src: 'pam_winbind.conf.j2', dest: '/usr/share/doc/libpam-winbind/examples/pam_winbind/pam_winbind.conf' }
+  notify:
+    - restart_samba
+
+- name: "Modify /etc/samba/smb.conf for AD logins"
+  blockinfile:
+    path: /etc/samba/smb.conf
+    insertafter: "use rfc2307 = yes"
+    block: |
+      template homedir = /home/%D/%U
+      template shell = /bin/bash
+      winbind use default domain = yes
+      winbind nss info = rfc2307
+      winbind enum users  = yes
+      winbind enum groups = yes
+      winbind offline logon = yes
+      vfs objects = acl_xattr
+      map acl inherit = Yes
+      store dos attributes = Yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+  notify: restart_samba
+
+- name: "Transfer templates"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: yes
+  with_items:
+    - { src: 'nsswitch.conf.j2', dest: '/etc/nsswitch.conf'}
+
+- name: "Configure PAM Configuration"
+  shell: DEBIAN_FRONTEND=noninteractive pam-auth-update
+
+- name: "Configure PAM - /etc/pam.d/common-account"
+  lineinfile:
+    path: /etc/pam.d/common-account
+    line: 'session    required    pam_mkhomedir.so    skel=/etc/skel/    umask=0022'
+    backup: yes
+
+- name:  "Download template domain-admins.j2 to /etc/sudoers.d/domain-admins"
+  template:
+    src: domain-admins.j2
+    dest: /etc/sudoers.d/domain-admins
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes

@@ -1,14 +1,31 @@
 ---
-  # title: ansible-role-samba4-primary-ad-dc
-  #
-  # Author: Luc Rutten
-  # Version: 1.0
-  # File: defaults/main.yml
-  #
-  # Description: Creating a primairy Active Directory Domain Controller.
+# title: role-samba4-primary-ad-dc
+#
+# Author: bitfinity-nl
+# Version: 1.0
+# File: defaults/main.yml
+#
+# Description: Creating a primairy Active Directory Domain Controller.
 
-  smb_workgroup   : TEST
-  smb_realm       : TEST.NET
-  smb_dns_servers : "{{ ansible_default_ipv4.address }}"
-  smb_username    : administrator
-  smb_password    : Welkom123
+# -- Samba4 AD settings -- 
+#
+# Variable(s):
+#   smb_repository     : 'default' or 'latest'                  # Set which repositories wil be used.    
+#   smb_workgroup      : 'LAB'                                 # Set workgroup (should be in capital letters).
+#   smb_realm          : 'LAB.LOCAL'                           # Set realm (should be in capital letters).
+#   smb_dns_servers    : '{{ ansible_default_ipv4.address }}'  # Set current ipv4 address.
+#   smb_dns_forwarders : '8.8.8.8 8.8.4.4'                     # Set DNS forwarders.
+#   smb_username       : 'administrator'                       # Set administrator account.
+#   smb_password       : 'Welkom123'                           # Set administrator password.
+#
+# Comment:
+#   Override variable(s) or set put them in your group_vars folder for reusing.
+#
+smb_repository    : '{{ def_ad_repository }}'
+smb_workgroup     : '{{ def_ad_workgroup }}'
+smb_realm         : '{{ def_ad_realm }}'
+smb_dns_servers   : '{{ ansible_default_ipv4.address }}'
+smb_dns_forwarder : '{{ def_ad_dns_forwarder }}'
+smb_username      : '{{ def_ad_admin}}'
+smb_password      : '{{ def_ad_pass }}'
+
