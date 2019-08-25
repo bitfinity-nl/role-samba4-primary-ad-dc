@@ -60,6 +60,11 @@
   when:
     - smb_dc_result.failed == true
 
+- name: "Transfer adc/smb.conf.j2 to /etc/samba/smb.conf"
+  template:
+    src: adc/smb.conf.j2
+    dest: /etc/samba/smb.conf
+
 - name: "Join {{ ansible_hostname }} as additional domain controller"
   raw: "samba-tool domain join {{ smb_realm }} DC -U{{ smb_workgroup }}\\{{smb_username }} --realm={{ smb_realm }} --domain={{ smb_workgroup }} --adminpass={{ smb_password }}"
   when:
