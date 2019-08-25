@@ -10,7 +10,8 @@
 # -- Samba4 AD settings -- 
 #
 # Variable(s):
-#   smb_repository     : 'default' or 'latest'                  # Set which repositories wil be used.    
+#   smb_repository     : 'default' or 'latest'                 # Set which repositories wil be used.    
+#   smb_role           : 'member'                              # Set samba4 role primary (only for initial setup), secondary, member. 
 #   smb_workgroup      : 'LAB'                                 # Set workgroup (should be in capital letters).
 #   smb_realm          : 'LAB.LOCAL'                           # Set realm (should be in capital letters).
 #   smb_dns_servers    : '{{ ansible_default_ipv4.address }}'  # Set current ipv4 address.
@@ -22,6 +23,7 @@
 #   Override variable(s) or set put them in your group_vars folder for reusing.
 #
 smb_repository    : '{{ def_ad_repository }}'
+smb_role          : 'member'
 smb_workgroup     : '{{ def_ad_workgroup }}'
 smb_realm         : '{{ def_ad_realm }}'
 smb_dns_servers   : '{{ ansible_default_ipv4.address }}'
