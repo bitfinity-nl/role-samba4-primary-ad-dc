@@ -1,0 +1,120 @@
+---
+# Title: Role Samba4
+#
+# Author: bitfinity-nl
+# File: tasks/ubt-1804-adc.yml
+#
+# Description:
+#   Add additional domain controller
+#
+
+- name: "Check OS if is allready DC"
+  shell: "samba-tool domain info {{ ansible_default_ipv4.address }}"
+  register: smb_dc_result
+  ignore_errors: yes
+
+- name: "Preseed Kerberos version 5: krb5-config/default_realm"
+  raw: "echo krb5-config krb5-config/default_realm string {{ smb_realm }} | sudo debconf-set-selections"
+  when:
+    - smb_dc_result.failed == true
+
+- name: "Preseed Kerberos version 5: krb5-config/add_servers_realm"
+  raw: "echo krb5-config krb5-config/add_servers_realm string {{ smb_realm }} | sudo debconf-set-selections"
+  when:
+    - smb_dc_result.failed == true
+
+- name: "Preseed PAM Configuration"
+  raw: "echo libpam-runtime  libpam-runtime/profiles multiselect     unix, winbind, systemd, mkhomedir | sudo debconf-set-selections"
+  when:
+    - smb_dc_result.failed == true
+
+- name: "Install dependencies"
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: present
+  vars:
+    packages:
+    - acl
+    - samba
+    - smbclient
+    - krb5-config
+    - krb5-user
+    - winbind
+    - libpam-winbind
+    - libnss-winbind
+
+- name: "back-up the initial /etc/samba/smb.conf to /etc/samba/smb.conf.initial"
+  copy:
+    src: /etc/samba/smb.conf
+    dest: /etc/samba/smb.conf.initial
+    remote_src: yes
+    force: no
+  when:
+    - smb_dc_result.failed == true
+
+- name: "rm /etc/samba/smb.conf"
+  file:
+    path: /etc/samba/smb.conf
+    state: absent
+  when:
+    - smb_dc_result.failed == true
+
+- name: "Join {{ ansible_hostname }} as additional domain controller"
+  raw: "samba-tool domain join {{ smb_realm }} DC -U{{ smb_workgroup }}\\{{smb_username }} --realm={{ smb_realm }} --domain={{ smb_workgroup }} --adminpass={{ smb_password }}"
+  when:
+    - smb_dc_result.failed == true  
+
+- name: "Configure DNS forwarder in /etc/samba/smb.conf"
+  replace:
+    path: /etc/samba/smb.conf
+    regexp: '127.0.0.53' 
+    replace: '{{ def_ad_dns_forwarder }}'
+    backup: yes
+
+- name: "back-Up the initial /etc/krb5.conf to /etc/krb5.conf.initial"
+  copy:
+    src: /etc/krb5.conf
+    dest: /etc/krb5.conf.initial
+    remote_src: yes
+    force: no
+
+- name: "Symlink to /var/lib/samba/private/krb5.conf to /etc/krb5.conf"
+  file:
+    src: /var/lib/samba/private/krb5.conf
+    dest: /etc/krb5.conf
+    state: link
+    force: yes
+
+- name: "Enable Services"
+  systemd:
+    masked: no
+    enabled: yes
+    state: started
+    name: "{{ item }}"
+  with_items:
+    - samba-ad-dc.service
+
+- name: "Edit Fstab"
+  replace:
+    path: /etc/fstab
+    regexp: 'errors=remount-ro 0'
+    replace: 'user_xattr,acl,barrier=1,errors=remount-ro,relatime 0'
+    backup: yes
+
+- name: "Allow traffic for Application Samba4 AD-DC"
+  ufw:
+    rule: allow
+    name: Samba
+
+- name: "Allow all DNS traffic on port 53/tcp"
+  ufw:
+    rule: allow
+    port: '53'
+    proto: "{{ item }}"
+  with_items:
+    - tcp
+    - udp
+
+- name: "Ubuntu login"
+  import_tasks: ubuntu-1804-amd64-login.yml
