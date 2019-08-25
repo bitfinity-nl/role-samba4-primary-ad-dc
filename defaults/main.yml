@@ -11,7 +11,7 @@
 #
 # Variable(s):
 #   smb_repository     : 'default' or 'latest'                 # Set which repositories wil be used.    
-#   smb_role           : 'member'                              # Set samba4 role primary (only for initial setup), secondary, member. 
+#   smb_role           : 'member'                              # Set samba4 role primary (only for initial setup), additional, member. 
 #   smb_workgroup      : 'LAB'                                 # Set workgroup (should be in capital letters).
 #   smb_realm          : 'LAB.LOCAL'                           # Set realm (should be in capital letters).
 #   smb_dns_servers    : '{{ ansible_default_ipv4.address }}'  # Set current ipv4 address.
