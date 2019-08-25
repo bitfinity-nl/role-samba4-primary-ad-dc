@@ -13,8 +13,17 @@
     - ansible_distribution_version == "16.04"
     - ansible_architecture == "x86_64"
 
-- name: "For OS: Ubuntu 18.04LTS, Arch: amd64"
+- name: "Role: primary DC, For OS: Ubuntu 18.04LTS, Arch: amd64"
   import_tasks: ubuntu-1804-amd64.yml
   when:
+    - smb_role == "primary"
     - ansible_distribution_version == "18.04"
     - ansible_architecture == "x86_64"
+
+- name: "Role: additional DC, For OS: Ubuntu 18.04LTS, Arch: amd64"
+  import_tasks: ubuntu-1804-amd64.yml
+  when:
+    - smb_role == "additional"
+    - ansible_distribution_version == "18.04"
+    - ansible_architecture == "x86_64"
+   
